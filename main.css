@@ -24,7 +24,7 @@ h1 {
     font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
 }
 p {
-	font-family:"Lucida Sans Unicode", "Lucida Grande", sans-serif;
+	font-family:Inconsolata, Consolas, "Liberation Mono", Menlo, Courier, monospace;
     font-size: 1em;
     line-height: 1.7em;
     color: #333;
@@ -35,7 +35,7 @@ footer {
 }
 
 ul.posts { 
-	font-family:"Lucida Sans Unicode", "Lucida Grande", sans-serif;
+	font-family:Inconsolata, Consolas, "Liberation Mono", Menlo, Courier, monospace;
     margin: 20px auto 40px; 
     font-size: 1em;
 }
