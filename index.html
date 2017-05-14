@@ -1,10 +1,17 @@
 ---
 layout: default
-title: Jakob Tippelt - Home
+title: Jakob - Home
 ---
 <div class="blurb">
 	<h1>hi</h1>
 	<p>Now you are here. On my site. Maybe you find something interesting for you. No guarantee!</p>
 	<p>Have a nice day.</p>
 	<p>– Jakob</p>
+	<br>
+	<ul class="posts">
+
+	  {% for post in site.posts %}
+	    <li><span>{{ post.date | date_to_string }}</span> » <a href="{{ post.url }}" title="{{ post.title }}">{{ post.title }}</a></li>
+	  {% endfor %}
+	</ul>
 </div><!-- /.blurb -->
