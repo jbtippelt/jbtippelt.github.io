@@ -3,7 +3,7 @@ body {
     width: 70%;
 }
 nav ul, footer ul {
-    font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
+    font-family:'Helvetica', 'Arial', 'Sans-Serif';
     padding: 0px;
     list-style: none;
     font-weight: bold;
@@ -21,7 +21,11 @@ a:hover {
 }
 h1 {
     font-size: 3em;
+<<<<<<< HEAD
     font-family: Georgia, serif;
+=======
+    font-family:"Lucida Sans Unicode", "Lucida Grande", sans-serif;
+>>>>>>> 32fc543f44622bbb17c4300b274e11ce0c42b87d
 }
 p {
 	font-family:"Lucida Sans Unicode", "Lucida Grande", sans-serif;
