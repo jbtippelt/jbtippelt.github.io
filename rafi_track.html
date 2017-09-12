@@ -1,0 +1,272 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+    <title>1-UNLIMITED-TRACK to 25-UNLIMITED-TRACK</title>
+    <script src="http://maps.google.com/maps/api/js?v=3.14&sensor=false" type="text/javascript"></script>
+    <script type="text/javascript">
+
+        function addTrack(latlngs) {
+            var polyline = new google.maps.Polyline({path:latlngs, strokeColor:"#0033FF", strokeWeight:2, strokeOpacity:1, clickable:false});
+            polyline.setMap(map);
+        }
+
+        function addRouteFragment(latlngs, startIndex) {
+            if (startIndex >= latlngs.length - 2)
+                return;
+
+            var waypoints = [];
+            var current = startIndex + 1;
+            while (current < latlngs.length - 1 && waypoints.length < 8) {
+                waypoints.push({location:latlngs[current]});
+                current++;
+            }
+            var directionsRequest = {
+                origin: latlngs[startIndex],
+                waypoints: waypoints,
+                destination: latlngs[current],
+                travelMode: google.maps.DirectionsTravelMode.DRIVING,
+                avoidHighways: false,
+                avoidTolls: true
+            };
+            var renderer = new google.maps.DirectionsRenderer({map: map, preserveViewport: true,
+                suppressMarkers: true, hideRouteList: true});
+            new google.maps.DirectionsService().route(directionsRequest, function (result, status) {
+                if (status == google.maps.DirectionsStatus.OK)
+                    renderer.setDirections(result);
+                setTimeout(function() {
+                    addRouteFragment(latlngs, current);
+                }, 250);
+            });
+        }
+
+        function addRoute(latlngs) {
+            addRouteFragment(latlngs, 0);
+        }
+
+        function addWaypoints(markers) {
+            for (var i = 0; i < markers.length; i++) {
+                markers[i].setMap(map);
+            }
+        }
+
+        function setError(text) {
+            var element = document.createElement("div");
+            element.innerHTML = text;
+            var error = document.getElementById("error");
+            error.style.padding = "20pt";
+            error.appendChild(element);
+        }
+
+        var outdoorActiveServerIndex = 0;
+
+        function getOutdoorActiveServerIndex() {
+            outdoorActiveServerIndex++;
+            if (outdoorActiveServerIndex > 3)
+                outdoorActiveServerIndex = 0;
+            return outdoorActiveServerIndex;
+        }
+
+        var openStreetMapServerIndex = 0;
+
+        function getOpenStreetMapServerIndex() {
+            openStreetMapServerIndex++;
+            if (openStreetMapServerIndex > 2)
+                openStreetMapServerIndex = 0;
+            return String.fromCharCode(openStreetMapServerIndex + 65);
+        }
+
+        var initialized, map, markerIcon;
+
+        function initialize() {
+            initialized = false;
+
+            try {
+                var MAPNIK_MAPTYPE_ID = "Mapnik", CYCLE_MAPTYPE_ID = "Cycle",
+                        HIKE_MAPTYPE_ID = "Hike", HIKE_MAPTYPE_SYMBOL_ID = "Hike Symbols",
+                        OUTDOOR_D_MAPTYPE_ID = "Outdoor D", OUTDOOR_A_MAPTYPE_ID = "Outdoor A",
+                        OUTDOOR_CH_MAPTYPE_ID = "Outdoor CH", TOPOGRAPHIC_MAPTYPE_ID = "Topographic";
+                var MAPTYPE_IDS = [google.maps.MapTypeId.ROADMAP, google.maps.MapTypeId.SATELLITE,
+                    google.maps.MapTypeId.HYBRID, google.maps.MapTypeId.TERRAIN,
+                    MAPNIK_MAPTYPE_ID, CYCLE_MAPTYPE_ID, HIKE_MAPTYPE_ID, HIKE_MAPTYPE_SYMBOL_ID,
+                    OUTDOOR_D_MAPTYPE_ID, OUTDOOR_A_MAPTYPE_ID, OUTDOOR_CH_MAPTYPE_ID, TOPOGRAPHIC_MAPTYPE_ID];
+                var DEFAULT_TILE_SIZE = new google.maps.Size(256, 256);
+                var mapOptions = {
+                    mapTypeId: google.maps.MapTypeId.ROADMAP,
+                    mapTypeControlOptions: {
+                        mapTypeIds: MAPTYPE_IDS,
+                        style: google.maps.MapTypeControlStyle.DROPDOWN_MENU
+                    },
+                    panControl: false,
+                    zoomControlOptions: {
+                        style: google.maps.ZoomControlStyle.LARGE
+                    },
+                    disableDefaultUI: false,
+                    streetViewControl: false,
+                    scaleControl: true,
+                    draggableCursor: 'default',
+                    draggingCursor: 'pointer'
+                };
+                map = new google.maps.Map(document.getElementById("map"), mapOptions);
+                map.mapTypes.set(MAPNIK_MAPTYPE_ID, new google.maps.ImageMapType({
+                    getTileUrl: function(coordinates, zoom) {
+                        return "http://" + getOpenStreetMapServerIndex() + ".tile.openstreetmap.org/" + zoom + "/" + coordinates.x + "/" + coordinates.y + ".png";
+                    },
+                    tileSize: DEFAULT_TILE_SIZE,
+                    maxZoom: 18,
+                    alt: "Mapnik rendering of OpenStreetMap data",
+                    name: MAPNIK_MAPTYPE_ID
+                }));
+                map.mapTypes.set(CYCLE_MAPTYPE_ID, new google.maps.ImageMapType({
+                    getTileUrl: function(coordinates, zoom) {
+                        return "http://" + getOpenStreetMapServerIndex() + ".tile.opencyclemap.org/cycle/" + zoom + "/" + coordinates.x + "/" + coordinates.y + ".png";
+                    },
+                    tileSize: DEFAULT_TILE_SIZE,
+                    maxZoom: 18,
+                    alt: "OpenCycleMap rendering of OpenStreetMap data",
+                    name: CYCLE_MAPTYPE_ID
+                }));
+                map.mapTypes.set(HIKE_MAPTYPE_ID, new google.maps.ImageMapType({
+                    getTileUrl: function(coordinates, zoom) {
+                        return "http://toolserver.org/tiles/hikebike/" + zoom + "/" + coordinates.x + "/" + coordinates.y + ".png";
+                    },
+                    tileSize: DEFAULT_TILE_SIZE,
+                    maxZoom: 18,
+                    alt: "HikeBikeMap rendering of OpenStreetMap data",
+                    name: HIKE_MAPTYPE_ID
+                }));
+                map.mapTypes.set(HIKE_MAPTYPE_SYMBOL_ID, new google.maps.ImageMapType({
+                    getTileUrl: function(coordinates, zoom) {
+                        return "http://toolserver.org/tiles/hikebike/" + zoom + "/" + coordinates.x + "/" + coordinates.y + ".png";
+                    },
+                    tileSize: DEFAULT_TILE_SIZE,
+                    maxZoom: 18,
+                    alt: "HikeBikeMap with Symbols rendering of OpenStreetMap data",
+                    name: HIKE_MAPTYPE_SYMBOL_ID
+                }));
+                map.mapTypes.set(OUTDOOR_D_MAPTYPE_ID, new google.maps.ImageMapType({
+                    getTileUrl: function(coordinates, zoom) {
+                        return "http://s" + getOutdoorActiveServerIndex() + ".outdooractive.com/portal/map/" + zoom + "/" + coordinates.x + "/" + coordinates.y + ".png";
+                    },
+                    tileSize: DEFAULT_TILE_SIZE,
+                    minZoom: 8,
+                    maxZoom: 17,
+                    alt: "Outdoor Active Summer Map Germany",
+                    name: OUTDOOR_D_MAPTYPE_ID
+                }));
+                map.mapTypes.set(OUTDOOR_A_MAPTYPE_ID, new google.maps.ImageMapType({
+                    getTileUrl: function(coordinates, zoom) {
+                        return "http://s" + getOutdoorActiveServerIndex() + ".outdooractive.com/austria/map/" + zoom + "/" + coordinates.x + "/" + coordinates.y + ".png";
+                    },
+                    tileSize: DEFAULT_TILE_SIZE,
+                    minZoom: 9,
+                    maxZoom: 17,
+                    alt: "Outdoor Active Summer Map Austria",
+                    name: OUTDOOR_A_MAPTYPE_ID
+                }));
+                map.mapTypes.set(OUTDOOR_CH_MAPTYPE_ID, new google.maps.ImageMapType({
+                    getTileUrl: function(coordinates, zoom) {
+                        return "http://s" + getOutdoorActiveServerIndex() + ".outdooractive.com/ch/map/" + zoom + "/" + coordinates.x + "/" + coordinates.y + ".png";
+                    },
+                    tileSize: DEFAULT_TILE_SIZE,
+                    minZoom: 10,
+                    maxZoom: 17,
+                    alt: "Outdoor Active Summer Map Schweiz",
+                    name: OUTDOOR_CH_MAPTYPE_ID
+                }));
+                map.mapTypes.set(TOPOGRAPHIC_MAPTYPE_ID, new google.maps.ImageMapType({
+                    getTileUrl: function(coordinates, zoom) {
+                        var mapType = zoom > 15 ? "topo" : "map";
+                        return "http://s" + getOutdoorActiveServerIndex() + ".outdooractive.com/portal/" + mapType + "/" + zoom + "/" + coordinates.x + "/" + coordinates.y + ".png";
+                    },
+                    tileSize: DEFAULT_TILE_SIZE,
+                    minZoom: 8,
+                    maxZoom: 17,
+                    alt: "Outdoor Active Topographic Map",
+                    name: TOPOGRAPHIC_MAPTYPE_ID
+                }));
+
+                var hikingSymbolsMapType = new google.maps.ImageMapType({
+                    getTileUrl: function(coord, zoom) {
+                        return "http://tile.lonvia.de/hiking/" + zoom + "/" + coord.x + "/" + coord.y + ".png";
+                    },
+                    tileSize: DEFAULT_TILE_SIZE,
+                    isPng: true,
+                    name: "Hiking Symbols"
+                });
+                var reliefMapType = new google.maps.ImageMapType({
+                    getTileUrl: function(coord, zoom) {
+                        return "http://toolserver.org/~cmarqu/hill/" + zoom + "/" + coord.x + "/" + coord.y + ".png";
+                    },
+                    tileSize: DEFAULT_TILE_SIZE,
+                    isPng: true,
+                    name: "Relief"
+                });
+
+                var copyrightControl = document.createElement('div');
+                copyrightControl.id = 'copyright-control';
+                copyrightControl.style.fontSize = '10px';
+                copyrightControl.style.fontFamily = 'Arial, sans-serif';
+                copyrightControl.style.margin = '0 2px 4px 0';
+                copyrightControl.style.whitespace = 'nowrap';
+                copyrightControl.index = 1;
+                map.controls[google.maps.ControlPosition.BOTTOM_RIGHT].push(copyrightControl);
+
+                markerIcon = {
+                    url: "http:///maps.google.com/mapfiles/kml/shapes/placemark_circle_maps.png",
+                    size: new google.maps.Size(32, 32),
+                    anchor: new google.maps.Point(15, 16)
+                };
+
+                // options: google.maps.MapTypeId.ROADMAP, google.maps.MapTypeId.SATELLITE, google.maps.MapTypeId.HYBRID, google.maps.MapTypeId.TERRAIN,
+                //          MAPNIK_MAPTYPE_ID, CYCLE_MAPTYPE_ID, HIKE_MAPTYPE_ID, HIKE_MAPTYPE_SYMBOL_ID, OUTDOOR_D_MAPTYPE_ID, OUTDOOR_A_MAPTYPE_ID, OUTDOOR_CH_MAPTYPE_ID, TOPOGRAPHIC_MAPTYPE_ID
+                map.setMapTypeId(google.maps.MapTypeId.ROADMAP);
+
+                google.maps.event.addListener(map, "maptypeid_changed", function() {
+                    var mapTypeId = map.getMapTypeId();
+                    if (mapTypeId == MAPNIK_MAPTYPE_ID || mapTypeId == CYCLE_MAPTYPE_ID || mapTypeId == HIKE_MAPTYPE_ID || mapTypeId == HIKE_MAPTYPE_SYMBOL_ID) {
+                        copyrightControl.innerHTML = 'Map data &copy; <a href="http://www.openstreetmap.org/" target="_blank">OpenStreetMap</a> and contributors <a href="http://creativecommons.org/licenses/by-sa/2.0/" target="_blank">CC-BY-SA</a> -';
+                    } else if (mapTypeId == OUTDOOR_D_MAPTYPE_ID || mapTypeId == OUTDOOR_A_MAPTYPE_ID || mapTypeId == OUTDOOR_CH_MAPTYPE_ID || mapTypeId == TOPOGRAPHIC_MAPTYPE_ID) {
+                        copyrightControl.innerHTML = 'Map data &copy; <a href="http://www.outdooractive.com/" target="_blank">OutdoorActive</a> -';
+                    } else {
+                        copyrightControl.innerHTML = '';
+                    }
+
+                    if (mapTypeId == HIKE_MAPTYPE_SYMBOL_ID){
+                        map.overlayMapTypes.setAt(0, hikingSymbolsMapType);
+                        map.overlayMapTypes.setAt(1, reliefMapType);
+                    }
+                    else {
+                        map.overlayMapTypes.setAt(0, null);
+                        map.overlayMapTypes.setAt(1, null);
+                    }
+                });
+
+                // options: Track, Route, Waypoint list
+                var route = [new google.maps.LatLng(53.59088,-115.56804),new google.maps.LatLng(53.59,-115.56789),new google.maps.LatLng(53.59087,-115.5692),new google.maps.LatLng(53.59091,-115.56888),new google.maps.LatLng(53.59093,-115.56908),new google.maps.LatLng(53.59093,-115.56874),new google.maps.LatLng(53.58537,-115.56635),new google.maps.LatLng(53.58531,-115.56639),new google.maps.LatLng(53.58527,-115.56639),new google.maps.LatLng(53.58638,-115.56686),new google.maps.LatLng(53.59077,-115.56946),new google.maps.LatLng(53.58979,-115.55763),new google.maps.LatLng(53.59093,-115.56206),new google.maps.LatLng(53.59091,-115.56924),new google.maps.LatLng(51.06289,-114.09583),new google.maps.LatLng(51.05542,-114.0854),new google.maps.LatLng(51.04767,-114.05583),new google.maps.LatLng(51.04269,-114.05437),new google.maps.LatLng(51.0428,-114.05467),new google.maps.LatLng(51.07804,-115.31027),new google.maps.LatLng(51.07804,-115.31024),new google.maps.LatLng(51.07948,-115.31218),new google.maps.LatLng(51.09598,-115.32041),new google.maps.LatLng(51.10255,-115.31981),new google.maps.LatLng(51.10581,-115.31921),new google.maps.LatLng(51.10916,-115.32162),new google.maps.LatLng(51.11229,-115.3181),new google.maps.LatLng(51.11395,-115.31761),new google.maps.LatLng(51.11456,-115.31758),new google.maps.LatLng(51.11132,-115.31978),new google.maps.LatLng(51.10629,-115.32007),new google.maps.LatLng(51.09906,-115.31903),new google.maps.LatLng(51.09906,-115.31903),new google.maps.LatLng(51.09076,-115.32259),new google.maps.LatLng(51.09076,-115.32259),new google.maps.LatLng(51.07798,-115.30859),new google.maps.LatLng(51.07784,-115.30948),new google.maps.LatLng(51.07848,-115.32141),new google.maps.LatLng(51.09068,-115.35655),new google.maps.LatLng(51.08916,-115.36028),new google.maps.LatLng(51.0886,-115.36131),new google.maps.LatLng(51.08839,-115.36011),new google.maps.LatLng(51.07747,-115.3096),new google.maps.LatLng(51.07738,-115.31003),new google.maps.LatLng(51.07772,-115.31029),new google.maps.LatLng(51.16343,-115.56242),new google.maps.LatLng(51.17575,-115.5728),new google.maps.LatLng(51.17468,-115.57297),new google.maps.LatLng(51.17713,-115.57074),new google.maps.LatLng(51.18499,-115.5484),new google.maps.LatLng(51.14957,-115.55894),new google.maps.LatLng(51.14907,-115.56483),new google.maps.LatLng(51.14302,-115.5656),new google.maps.LatLng(51.14379,-115.57092),new google.maps.LatLng(51.14388,-115.57384),new google.maps.LatLng(51.14508,-115.5759),new google.maps.LatLng(51.14659,-115.57845),new google.maps.LatLng(51.1451,-115.57539),new google.maps.LatLng(51.15479,-115.55343),new google.maps.LatLng(51.18496,-115.54897),new google.maps.LatLng(-28.0075031,152.8721856),new google.maps.LatLng(51.22379,-115.49878),new google.maps.LatLng(51.22953,-115.49715),new google.maps.LatLng(51.23645,-115.48888),new google.maps.LatLng(51.24774,-115.49789),new google.maps.LatLng(51.24783,-115.49532),new google.maps.LatLng(51.24805,-115.49555),new google.maps.LatLng(51.23496,-115.51735),new google.maps.LatLng(51.17561,-115.57228),new google.maps.LatLng(51.17685,-115.57079),new google.maps.LatLng(51.18489,-115.54817),new google.maps.LatLng(51.15241,-115.61305),new google.maps.LatLng(51.15241,-115.61475),new google.maps.LatLng(51.16505,-115.61601),new google.maps.LatLng(51.17286,-115.59167),new google.maps.LatLng(51.17432,-115.57193),new google.maps.LatLng(51.17994,-115.57553),new google.maps.LatLng(51.17808,-115.56705),new google.maps.LatLng(51.18504,-115.54791),new google.maps.LatLng(51.18504,-115.54774),new google.maps.LatLng(51.18174,-115.55528),new google.maps.LatLng(51.1759,-115.55477),new google.maps.LatLng(51.1768,-115.55357),new google.maps.LatLng(51.32776,-116.18027),new google.maps.LatLng(51.3286,-116.18094),new google.maps.LatLng(51.42514,-116.1792),new google.maps.LatLng(51.42591,-116.18126),new google.maps.LatLng(51.42812,-116.18211),new google.maps.LatLng(51.42811,-116.18236),new google.maps.LatLng(51.42815,-116.18237),new google.maps.LatLng(51.42781,-116.18211),new google.maps.LatLng(51.42772,-116.18211),new google.maps.LatLng(51.42768,-116.18213),new google.maps.LatLng(51.4277,-116.18222),new google.maps.LatLng(51.42724,-116.18274),new google.maps.LatLng(51.33239,-116.05579),new google.maps.LatLng(51.18131,-115.57637),new google.maps.LatLng(51.17929,-115.57134),new google.maps.LatLng(51.17927,-115.57135),new google.maps.LatLng(51.18109,-115.74489),new google.maps.LatLng(51.42477,-116.17946),new google.maps.LatLng(51.42684,-116.18119),new google.maps.LatLng(51.42761,-116.18213),new google.maps.LatLng(51.41674,-116.21841),new google.maps.LatLng(51.4167,-116.23947),new google.maps.LatLng(51.41241,-116.23707),new google.maps.LatLng(51.41456,-116.21347),new google.maps.LatLng(51.4285,-116.18665),new google.maps.LatLng(51.42898,-116.18413),new google.maps.LatLng(51.41412,-116.45684),new google.maps.LatLng(51.43978,-116.54078),new google.maps.LatLng(51.44643,-116.53503),new google.maps.LatLng(51.44525,-116.52672),new google.maps.LatLng(51.4383,-116.53462),new google.maps.LatLng(51.4383,-116.53462),new google.maps.LatLng(51.43997,-116.54028),new google.maps.LatLng(51.43997,-116.54028),new google.maps.LatLng(51.42666,-116.53416),new google.maps.LatLng(51.42666,-116.53416),new google.maps.LatLng(51.45185,-116.25641),new google.maps.LatLng(51.45185,-116.25641),new google.maps.LatLng(51.4273,-116.18268),new google.maps.LatLng(51.4273,-116.18268),new google.maps.LatLng(51.16396,-115.5582),new google.maps.LatLng(51.1845,-115.55865),new google.maps.LatLng(51.09039,-115.36073),new google.maps.LatLng(50.2384,-115.8744),new google.maps.LatLng(50.1362,-115.57927),new google.maps.LatLng(50.13453,-115.57755),new google.maps.LatLng(50.13509,-115.57712),new google.maps.LatLng(50.13621,-115.57874),new google.maps.LatLng(50.17041,-115.85451),new google.maps.LatLng(50.53931,-116.00909),new google.maps.LatLng(51.24512,-116.02908),new google.maps.LatLng(51.17664,-115.57227),new google.maps.LatLng(51.4883,-116.25145),new google.maps.LatLng(51.4883,-116.25145),new google.maps.LatLng(51.67319,-116.44992),new google.maps.LatLng(51.67319,-116.44992),new google.maps.LatLng(52.21468,-117.23032),new google.maps.LatLng(52.21468,-117.23032),new google.maps.LatLng(52.46991,-117.49563),new google.maps.LatLng(52.46991,-117.49563),new google.maps.LatLng(52.53274,-117.64609),new google.maps.LatLng(52.53274,-117.64609),new google.maps.LatLng(52.53743,-117.64197),new google.maps.LatLng(52.53743,-117.64197),new google.maps.LatLng(52.85274,-118.11179),new google.maps.LatLng(52.85274,-118.11179),new google.maps.LatLng(52.88224,-117.83804),new google.maps.LatLng(52.88224,-117.83804),new google.maps.LatLng(52.83305,-118.06453),new google.maps.LatLng(52.57149,-117.71707),new google.maps.LatLng(52.4877,-117.65549),new google.maps.LatLng(52.53337,-117.64515),new google.maps.LatLng(52.61628,-117.84685),new google.maps.LatLng(52.84107,-118.07233),new google.maps.LatLng(53.04308,-118.08019),new google.maps.LatLng(53.04282,-118.07504),new google.maps.LatLng(53.04037,-118.06766),new google.maps.LatLng(53.04324,-118.0757),new google.maps.LatLng(53.04393,-118.08317),new google.maps.LatLng(52.84111,-118.07236),new google.maps.LatLng(53.00682,-114.75652),new google.maps.LatLng(52.95423,-114.77505),new google.maps.LatLng(52.95313,-114.78389),new google.maps.LatLng(52.95575,-114.78003),new google.maps.LatLng(52.99738,-114.76192),new google.maps.LatLng(51.77182,-120.89885),new google.maps.LatLng(53.05776,-119.21138),new google.maps.LatLng(53.0928,-119.2364),new google.maps.LatLng(53.10233,-119.21391),new google.maps.LatLng(53.10851,-119.21049),new google.maps.LatLng(53.10877,-119.21083),new google.maps.LatLng(53.10877,-119.21074),new google.maps.LatLng(53.10872,-119.21068),new google.maps.LatLng(53.1115,-119.21036),new google.maps.LatLng(53.11906,-119.20932),new google.maps.LatLng(53.12606,-119.20668),new google.maps.LatLng(53.1326,-119.20695),new google.maps.LatLng(53.15456,-119.15422),new google.maps.LatLng(53.15467,-119.1545),new google.maps.LatLng(53.15468,-119.15445),new google.maps.LatLng(53.15462,-119.15427),new google.maps.LatLng(53.15464,-119.15443),new google.maps.LatLng(53.14528,-119.16808),new google.maps.LatLng(53.10903,-119.21192),new google.maps.LatLng(53.10924,-119.21149),new google.maps.LatLng(53.09847,-119.21587),new google.maps.LatLng(53.09052,-119.19696),new google.maps.LatLng(53.08765,-119.196),new google.maps.LatLng(53.08723,-119.19586),new google.maps.LatLng(49.26942,-123.13809),new google.maps.LatLng(49.27252,-123.13527),new google.maps.LatLng(49.27261,-123.13493),new google.maps.LatLng(49.27239,-123.13515),new google.maps.LatLng(49.27741,-123.14107),new google.maps.LatLng(49.27818,-123.14854),new google.maps.LatLng(49.2834,-123.12297),new google.maps.LatLng(49.20819,-123.11893),new google.maps.LatLng(49.21064,-123.11743),new google.maps.LatLng(48.42669,-123.36981),new google.maps.LatLng(48.42052,-123.36643),new google.maps.LatLng(48.457,-123.5356),new google.maps.LatLng(48.72792,-123.63855),new google.maps.LatLng(48.99672,-123.81984),new google.maps.LatLng(49.19078,-123.95305),new google.maps.LatLng(49.17232,-123.93781),new google.maps.LatLng(49.18058,-123.92842),new google.maps.LatLng(49.19413,-123.92795),new google.maps.LatLng(49.19735,-123.93404),new google.maps.LatLng(49.20237,-123.94131),new google.maps.LatLng(49.19526,-123.9465),new google.maps.LatLng(49.18733,-123.94361),new google.maps.LatLng(49.17832,-123.93571),new google.maps.LatLng(49.26111,-123.69262),new google.maps.LatLng(49.29205,-123.41556),new google.maps.LatLng(49.28809,-123.11385),new google.maps.LatLng(49.34352,-123.11534),new google.maps.LatLng(49.34305,-123.1156),new google.maps.LatLng(49.34198,-123.11397),new google.maps.LatLng(49.29594,-123.13545),new google.maps.LatLng(49.29997,-123.11803),new google.maps.LatLng(49.30311,-123.13026),new google.maps.LatLng(49.31238,-123.1506),new google.maps.LatLng(49.29755,-123.15747),new google.maps.LatLng(49.2872,-123.14168),new google.maps.LatLng(49.26842,-123.20015),new google.maps.LatLng(49.22485,-122.88907),new google.maps.LatLng(49.22489,-122.88951),new google.maps.LatLng(49.22493,-122.89105),new google.maps.LatLng(49.22497,-122.89105),new google.maps.LatLng(49.22522,-122.89382),new google.maps.LatLng(49.22518,-122.89382),new google.maps.LatLng(49.22522,-122.89391),new google.maps.LatLng(49.22522,-122.89391),new google.maps.LatLng(49.22523,-122.89381),new google.maps.LatLng(49.22528,-122.89388),new google.maps.LatLng(49.22527,-122.89381),new google.maps.LatLng(49.22523,-122.89381),new google.maps.LatLng(49.22227,-122.89309),new google.maps.LatLng(49.21193,-123.10595),new google.maps.LatLng(49.26094,-123.14063),new google.maps.LatLng(49.27306,-123.20284),new google.maps.LatLng(49.68291,-123.14421),new google.maps.LatLng(49.6835,-123.14242),new google.maps.LatLng(49.68595,-123.1377),new google.maps.LatLng(49.68625,-123.1347),new google.maps.LatLng(49.68626,-123.13455),new google.maps.LatLng(49.26919,-123.19774),new google.maps.LatLng(49.28429,-123.11571),new google.maps.LatLng(49.27746,-123.13515),new google.maps.LatLng(49.27858,-123.13251),new google.maps.LatLng(49.27956,-123.13206),new google.maps.LatLng(49.28505,-123.14322),new google.maps.LatLng(49.27199,-123.12937),new google.maps.LatLng(49.27598,-123.10808),new google.maps.LatLng(49.37911,-123.08408),new google.maps.LatLng(49.38251,-123.07858),new google.maps.LatLng(49.37969,-123.08267),new google.maps.LatLng(49.37191,-123.09777),new google.maps.LatLng(49.31904,-123.13485),new google.maps.LatLng(49.28767,-123.11305),new google.maps.LatLng(49.35577,-123.1105),new google.maps.LatLng(49.3521,-123.11394),new google.maps.LatLng(49.34821,-123.11455),new google.maps.LatLng(49.34233,-123.11395),new google.maps.LatLng(49.28938,-123.13039),new google.maps.LatLng(49.27394,-123.12193),new google.maps.LatLng(49.28021,-123.13249),new google.maps.LatLng(49.27957,-123.13249),new google.maps.LatLng(49.30411,-123.14073),new google.maps.LatLng(49.30321,-123.15565),new google.maps.LatLng(49.30295,-123.15625),new google.maps.LatLng(49.30282,-123.15659),new google.maps.LatLng(49.26089,-123.1226)];
+                addRoute(route);
+                var track = [];
+                addTrack(track);
+                var waypoints = [];
+                addWaypoints(waypoints);
+
+                // zoom
+                map.fitBounds(new google.maps.LatLngBounds(new google.maps.LatLng(-28.0075031,-123.95305), new google.maps.LatLng(53.59093,152.8721856)));
+                map.setCenter(new google.maps.LatLng(12.79171345,14.459567799999995));
+            } catch (e) {
+                setError("<p>Sorry, could not initialize Google Maps.</p><p>Error name: " + e.name + "</p><p>Error message: " + e.message + "</p><p><a href='javascript:self.location.reload()'>Retry</a></p>");
+            }
+        }
+    </script>
+    <style type="text/css">
+        #map { width: 600px; height: 400px }
+        #directions { display: none }
+    </style>
+</head>
+<body onload="initialize()">
+<h1>1-UNLIMITED-TRACK to 25-UNLIMITED-TRACK</h1>
+<div id="error"></div>
+<div id="map"></div>
+<div id="directions"></div>
+</body>
+</html>
