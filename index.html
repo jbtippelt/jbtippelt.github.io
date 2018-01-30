@@ -1,17 +1,118 @@
----
-layout: default
-title: Jakob - Home
----
-<div class="blurb">
-	<h1>hi</h1>
-	<p>Now you are here. On my site. Maybe you find something interesting for you. No guarantee!</p>
-	<p>Have a nice day.</p>
-	<p>– Jakob</p>
-	<br>
-	<ul class="posts">
+<!DOCTYPE html>
+<html lang="en">
 
-	  {% for post in site.posts %}
-	    <li><span>{{ post.date | date_to_string }}</span> » <a href="{{ post.url }}" title="{{ post.title }}">{{ post.title }}</a></li>
-	  {% endfor %}
-	</ul>
-</div><!-- /.blurb -->
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>741</title>
+	<link rel="shortcut icon" href="./img/favicon.ico"/>
+
+    <!-- Bootstrap Core CSS -->
+    <link href="css/styles.css" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link href="css/headder.css" rel="stylesheet">
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+</head>
+
+<body>
+
+    <!-- Image Background Page Header -->
+    <!-- Note: The background image is set within the business-casual.css file. -->
+    <header class="business-header">
+       
+    </header>
+
+    <!-- Page Content -->
+    <div class="container">
+
+        <hr>
+
+        <div class="row">
+            <div class="col-sm-8">
+                <h2>Was wir machen</h2>
+                <p>741 bietet maßgeschneiderte Software Lösungen im Bereich Mobile Apps an. Seit 2016 implementieren wir sowohl Android als auch iOS Apps für unsere Nutzer. Dabei wird stets auf hohe Qualität gesetzt um möglichst langlebige Produkte zu entwickeln.</p>
+                <p>Durch das junge dynamische Team sind wir stets über aktuelle Trends und Standarts informiert um gemeinsam mit Ihnen unkompliziert und schnell eine Lösung zu finden. Wir betreuen Sie kompetent und kundennah von der Konzeptphase bis zum Release.</p>
+                <!--p>
+                    <a class="btn btn-default btn-lg" href="#">Call to Action &raquo;</a>
+                </p-->
+            </div>
+            <div class="col-sm-4">
+                <h2>Kontakt</h2>
+                <!--address>
+                    <strong>741apps</strong>
+                    <br>71111 Waldenbuch
+                    <br>Beverly Hills, CA 90210
+                    <br>
+                </address-->
+                <address>
+                    <!--abbr title="Phone">P:</abbr>(123) 456-7890-->
+                    <strong>741 Apps</strong>
+                    <br>Jakob Tippelt
+                    <br>E-Mail: <a href="mailto:#">741apps@gmail.com</a>
+                </address>
+            </div>
+        </div>
+        <!-- /.row -->
+
+        <hr>
+
+        <div class="row">
+            <div class="col-sm-4">
+                <img class="img-circle img-responsive img-center" width="300px" src="./img/worktimetracker.png" alt="">
+                <h2>WorkTimeTracker Pro</h2>
+                <p>WorkTimeTracker ist eine einfache Arbeitszeit-Erfassungs-App. Für jeden angelegten Job kann man Sessions starten oder manuell anlegen, um die tägliche Arbeitszeit korrekt zu erfassen und schlussendlich effektiver zu arbeiten. <a href="https://play.google.com/store/apps/details?id=de.jak0bt.worktimetracker" target="_blank">Get it for Android</a>.</p>
+            </div>
+            <div class="col-sm-4">
+                <img class="img-circle img-responsive img-center" width="300px" src="./img/ponde.png" alt="">
+                <h2>Ponde Check I/O</h2>
+                <p>Diese App ist eine Realisierung für ein Check-In-Out-System, bei dem mittels QR-Code oder manuell Personen ein/ausgecheckt und personenbezogene Daten angezeigt werden können. Alle Daten werden in Echtzeit auf allen Endgeräten synchronisiert. <a href="http://ponde.de" target="_blank">Mehr zur Ponderosa Freizeit Waldenbuch</a>.</p>
+            </div>
+            <div class="col-sm-4">
+                <img class="img-circle img-responsive img-center" width="300px" src="./img/tsvAndroid.png" alt="">
+                <h2>TSV Waldenbuch</h2>
+                <p>Lesen Sie die neusten Berichte und bekommen Sie einen Überblick über die aktuellen Termine des lokalen TSV Waldenbuch. Die App ist inoffiziell. <a href="https://play.google.com/store/apps/details?id=de.jboka.tsvAndroid" target="_blank">Get it for Android</a>.</p>
+            </div>
+        
+        </div>
+        <!-- /.row -->
+        <br>
+        <br>
+        <div class="row">
+        	 <div class="col-sm-4">
+                <img class="img-circle img-responsive img-center" width="300px" src="./img/thelgame.png" alt="">
+                <h2>The L Game</h2>
+                <p>Mal wieder eine langweilige Party bei Freunden? Mit dieser Party-App passiert dir das nicht mehr. Spiele eines der vorgegebenen Spiele oder erstelle selber eines mit eigenen Regeln. Füge Spieler hinzu und lasse den Spaß beginnen. <a href="" target="_blank">Get it soon for iOS</a>.</p>
+            </div>
+        </div>
+
+        <hr>
+
+        <!-- Footer -->
+        <footer>
+            <div class="row">
+                <div class="col-lg-12">
+                    <p>Copyright &copy; 741apps.de 2017</p>
+                </div>
+            </div>
+            <!-- /.row -->
+        </footer>
+
+    </div>
+    <!-- /.container -->
+
+</body>
+
+</html>
