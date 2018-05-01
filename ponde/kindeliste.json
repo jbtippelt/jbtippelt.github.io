@@ -1,0 +1,32 @@
+[
+	{
+		"firstname":"Jakob",
+		"lastname":"Tippelt",
+		"group":5,
+		"tableservice":0,
+		"phone":"07157 8691",
+		"mobile":"015232795303",
+		"state":"Ponde",
+		"bus":"Glashütte"
+	},
+	{
+		"firstname":"Luca",
+		"lastname":"Meyer",
+		"group":1,
+		"tableservice":1,
+		"phone":"07157 12333",
+		"mobile":"015232123123",
+		"state":"Zuhause",
+		"bus":"Pinguin"
+	},
+	{
+		"firstname":"Rafaela",
+		"lastname":"Pfeil",
+		"group":10,
+		"tableservice":2,
+		"phone":"07157 73456",
+		"mobile":"015235434566",
+		"state":"Aktivität 1",
+		"bus":"Bonholz"
+	},
+]
